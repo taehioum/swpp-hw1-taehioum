@@ -35,9 +35,6 @@ Here's what the html looks like in the baby.html files:
 
 
 class BabynameFileNotFoundException(Exception):
-    """
-    A custom exception for the cases that the babyname file does not exist.
-    """
     pass
 
 
@@ -50,10 +47,20 @@ def check_filename_existence(func):
     Raises:
         BabynameFileNotFoundException: if there is no such file named as the first argument of the function to decorate.
     """
-    # TODO: Implement this decorator.
+    def aux(*args, **kwargs):
+        # omitting the [0] element, which is self,
+        # we assume that the first argument is the filename
+        filename = args[1]
+
+        if not os.path.isfile(filename):
+            msg = "No such babyname file or directory: {}".format(filename)
+            raise BabynameFileNotFoundException(msg)
+        return func(*args, **kwargs)
+
+    return aux
 
 
-class BabynameParser:
+class BabynameParser():
 
     @check_filename_existence
     def __init__(self, filename):
@@ -66,10 +73,9 @@ class BabynameParser:
             filename: The filename to parse.
         """
 
-        text = "File is not read yet"  # TODO: Open and read the given file.
-        # Could process the file line-by-line, but regex on the whole text at once is even easier.
+        with open(filename, 'r') as f:
+            text = f.read()
 
-        # The year extracting code is provided. Implement the tuple extracting code by using this.
         year_match = re.search(r'Popularity\sin\s(\d{4})', text)
         if not year_match:
             # We didn't find a year, so we'll exit with an error message.
@@ -79,7 +85,15 @@ class BabynameParser:
 
         # Extract all the data tuples with a findall()
         # each tuple is: (rank, male-name, female-name)
-        self.rank_to_names_tuples = []  # TODO: Extract the list of rank to names tuples.
+
+        pattern = re.compile("""
+                (\d+)          # rank
+                </td><td>    # some html stuff
+                ([a-zA-Z]+)    # male names
+                </td><td>    # some html stuff
+                ([a-zA-Z]+)    # female names
+        """, re.VERBOSE)
+        self.rank_to_names_tuples = pattern.findall(text)
 
     def parse(self, parsing_lambda):
         """
@@ -92,4 +106,4 @@ class BabynameParser:
         Returns:
             The list of parsed babynames.
         """
-        # TODO: Implement this method.
+        return [parsing_lambda(tup) for tup in self.rank_to_names_tuples]
