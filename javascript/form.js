@@ -1,5 +1,4 @@
 class Form {
-  successMessage = "Successfully Submitted!";
   constructor(
     email,
     password,
@@ -22,49 +21,63 @@ class Form {
     this.birth_day = birth_day;
     this.birth_year = birth_year;
 
+    this.field_name = [
+      "email", "password", "password-confirmation",
+      "phone-number", "fname", "lname",
+      "age", "birth-month", "birth-day", "birth-year"];
+
+    this.validity = {};
+    this.text_of_field = {
+        [this.field_name[0]]: "Email",
+        [this.field_name[1]]: "Password",
+        [this.field_name[2]]: "Password Confirmation",
+        [this.field_name[3]]: "Phone number",
+        [this.field_name[4]]: "First Name",
+        [this.field_name[5]]: "Last Name",
+        [this.field_name[6]]: "Age",
+        [this.field_name[7]]: "Month",
+        [this.field_name[8]]: "Day",
+        [this.field_name[9]]: "Year",
+      };
+    // Eww.
+    this.rule_of_field = {
+      [this.field_name[0]]: "characters other than @ or whitespace followed by an @ sign, followed by more characters (not '@', '.', or whitespace: co.kr is not allowed in this case), and then a \".\". After the \".\", you can only write 2 to 3 letters from a to z.",
+      [this.field_name[1]]: "Must contain at least one number and one uppercase and one lowercase letter, and at least 8 or more characters.",
+      [this.field_name[2]]: "Must match password.",
+      [this.field_name[3]]: "nnn-nnnn-nnnn: three numbers, then \"-\", followed by four numbers and a \"-\", then four numbers.",
+      [this.field_name[4]]: "Start with a capital letter, followed by one or more lowercase letters. Should only contain alphabets (A-Z, a-z)",
+      [this.field_name[5]]: "Start with a capital letter, followed by one or more lowercase letters. Should only contain alphabets (A-Z, a-z)",
+      [this.field_name[6]]: "Must be a number between 0 and 200 (inclusive).",
+      [this.field_name[7]]: "Must be one of \"January\", \"February\", ..., \"December\"",
+      [this.field_name[8]]: "Must be a number of one or two digits.",
+      [this.field_name[9]]: "Must be a number between 1800 and 2018 (inclusive).",
+      };
   }
 
-  // user@domain.xxx (single ., single @)
-  email_rule = /^\w+([-]?\w+)*@\w+([-]?\w+)*(\.[a-z]{2,3})$/;
 
-  // Capital letter, 1 or more lower case
-  name_rule = /^[A-Z][a-z]+$/;
 
-  // one upper, lower, number and more than 8(inclusive)
-  password_rule =  /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
 
-  // ###-####-####
-  phone_rule = /^[0-9]{3}-[0-9]{4}-[0-9]{4}$/
 
-  monthes = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
+
 
 
   check(value, pattern) {
-    return value.match(pattern)
+    // .match returns null if there is no match.
+    if (value.match(pattern))
+      return true;
+    else
+      return false;
   }
   check_email() {
-    return (this.email.match(this.email_rule))
+    // user@domain.xxx (single ., single @)
+    var email_rule = /^\w+([-]?\w+)*@\w+([-]?\w+)*(\.[a-z]{2,3})$/;
+    return this.check(this.email, email_rule);
   }
 
   check_password() {
-    // one digit, one lowercase, one UPPERCASE, over 8 chars.
-    if (this.password.match(this.password_rule))
-      return true
-    else
-      return false
+    // one upper, lower, number and more than 8(inclusive)
+    var password_rule =  /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+    return this.check(this.password, password_rule);
   }  
 
   check_password_confirmation() {
@@ -72,15 +85,21 @@ class Form {
   }  
 
   check_phone_number() {
-    return (this.check(this.phone_number, this.phone_rule))
+    // ###-####-####
+    let phone_rule = /^[0-9]{3}-[0-9]{4}-[0-9]{4}$/
+    return (this.check(this.phone_number, phone_rule))
   }  
 
   check_fname() {
-    return (this.check(this.fname, this.name_rule))
+    // Capital letter, 1 or more lower case
+    let name_rule = /^[A-Z][a-z]+$/;
+    return (this.check(this.fname, name_rule))
   }
 
   check_lname() {
-    return (this.check(this.lname, this.name_rule))
+    // Capital letter, 1 or more lower case
+    let name_rule = /^[A-Z][a-z]+$/;
+    return (this.check(this.lname, name_rule))
   }
 
   check_age() {
@@ -89,7 +108,11 @@ class Form {
   }
 
   check_month() {
-    return this.monthes.includes(this.birth_month)
+    let month = ["January", "February", "March", "April",
+                 "May", "June", "July", "August",
+                 "September", "October", "November", "December"];
+
+    return month.includes(this.birth_month)
   }
 
   check_day() {
@@ -103,65 +126,60 @@ class Form {
     return ((1800 <= year) && (year <= 2018))
   }
 
-  //checks validity of all input forms
+  // checks validity of all inputs in the form
   check_validity() {
-    let fail_msg = "You must correct:\n\n";
-    let tmp = fail_msg;
-    let successMessage = 'Successfully Submitted!';
-
-    // Yes, I know there is a better way; but lets try this first.
-    if (!(this.check_email())) {
-      // What should be done: Extract this from html
-      fail_msg += "Email\n";
-      document.getElementById("email-label").innerHTML += "X";
-    }
-    if (!(this.check_password())) {
-      fail_msg += "Password\n";
-      document.getElementById("password-label").innerHTML += "X";
-    }
-    if (!(this.check_password_confirmation())) {
-      fail_msg += "Password Confirmation\n";
-      document.getElementById("password-confirmation-label").innerHTML += "X";
-    }
-    if (!(this.check_phone_number())) {
-      fail_msg += "Phone Number\n";
-      document.getElementById("phone-number-label").innerHTML += "X";
-    }
-    if (!(this.check_fname())) {
-      fail_msg += "First Name\n";
-      document.getElementById("fname-label").innerHTML += "X";
-    }
-    if (!(this.check_lname())) {
-      fail_msg += "Lirst Name\n";
-      document.getElementById("lname-label").innerHTML += "X";
-    }
-    if (!(this.check_age())) {
-      fail_msg += "Age\n";
-      document.getElementById("age-label").innerHTML += "X";
-    }
-    if (!(this.check_month())) {
-      fail_msg += "Month\n";
-      document.getElementById("birth-month-label").innerHTML += "X";
-    }
-    if (!(this.check_day())) {
-      fail_msg += "Day\n";
-      document.getElementById("birth-day-label").innerHTML += "X";
-    }
-    if (!(this.check_year())) {
-      fail_msg += "Year\n";
-      document.getElementById("birth-year-label").innerHTML += "X";
-    }
-
-    if (fail_msg != tmp)
-      return fail_msg;
-    if (fail_msg == tmp)
-      return successMessage;
-
+    // NO.GA.DA.
+    this.validity['email'] = this.check_email();
+    this.validity['password'] = this.check_password();
+    this.validity['password-confirmation'] = this.check_password_confirmation();
+    this.validity['phone-number'] = this.check_phone_number();
+    this.validity['fname'] = this.check_fname();
+    this.validity['lname'] = this.check_lname();
+    this.validity['age'] = this.check_age();
+    this.validity['birth-month'] = this.check_month();
+    this.validity['birth-day'] = this.check_day();
+    this.validity['birth-year'] = this.check_year();
   }
 
+  // based on validity, RESET or ADD X to innerHTML of each form
+  update_label() {
+    for (var key in this.validity) {
+      if (!this.validity[key])
+        // the label ids adds -label suffix to each name
+        document.getElementById(key+'-label').innerHTML = "X";
+      else
+        document.getElementById(key+'-label').innerHTML = "";
+    }
+  }
 
+  // based on validity, show rules for each form
+  update_tooltip() {
+    for (var key in this.validity) {
+      if (!this.validity[key])
+        document.forms["form"][key].title = this.rule_of_field[key];
+      else
+        document.forms["form"][key].title = "";
+    }
+  }
 
+  result_msg() {
+    let fail_msg = "You must correct:\n\n";
+    let tmp = fail_msg;
+    let success_msg = 'Successfully Submitted!';
+    this.check_validity();
 
+    for (var key in this.validity) {
+      if (!this.validity[key])
+        fail_msg += this.text_of_field[key] + '\n';
+    }
+
+    //smelly code, but simple. If fail_msg has changed,
+    //it means one of the fields have failed validity check.
+    if (tmp != fail_msg)
+      return fail_msg;
+    else
+      return success_msg;
+  }
 }
 
 var but = document.createElement('button');
@@ -169,7 +187,7 @@ var but = document.createElement('button');
 but.innerHTML = "Check";
 
 but.onclick = function() {
-  // TODO: Fill in the rest of the function. Use the Form class defined above
+  //extract values from html
   var email = document.form.email.value;
   var password = document.forms["form"]["password"].value;
   var password_confirmation = document.forms["form"]["password-confirmation"].value;
@@ -187,11 +205,12 @@ but.onclick = function() {
 
 
   // TODO: Fill the alert message according to the validation result by following the form in README.md.
-  alert(form.check_validity());
+  form.check_validity();
+  form.update_label();
+  form.update_tooltip();
+  alert(form.result_msg());
 
-  // Hint: you can use the RegExp class for matching a string with the `test` method.
   // Hint: you can set contents of elements by finding it with `document.getElementById`, and fixing the `innerHTML`.
   // Hint: modify 'title' attribute of each label to display your message
-  // Hint: Ask Google to do things you don't know yet! There should be others who have already done what you are to encounter.
 };
 document.body.appendChild(but);
