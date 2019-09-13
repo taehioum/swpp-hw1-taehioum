@@ -70,7 +70,7 @@ class Form {
   }
   check_email() {
     // user@domain.xxx (single ., single @)
-    var email_rule = /^\w+([-]?\w+)*@\w+([-]?\w+)*(\.[a-z]{2,3})$/;
+    var email_rule = /^\w+([-]?\w+)*@\w+([-]?\w+)*(\.[a-zA-Z]{2,3})$/;
     return this.check(this.email, email_rule);
   }
 
